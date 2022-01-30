@@ -3,16 +3,29 @@ import numpy as np
 #from matplotlib import pyplot as plt
 from mss import mss
 from time import sleep
+from os.path import join as path
 import mouse
 #directKeys
 
 sct = mss()
-PATH = 'data'
+IMG_PATH = 'data'
+prec_val = 0
+repetition = False
 
-# Part of the screen to capture
+### Parts of the screen to capture ###
+# screen resolution
 monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
+# left side of the screen
+left_side = {'left':0, 'top':0, 'width':829, 'height':1080}
+# right side of the screen
+right_side = {'left':1039, 'top':0, 'width':881, 'height':1080}
+# in-game window
+window = {'left':633, 'top':214, 'width':672, 'height':548}
+# in-game window border (not really, more of a recognisable part of the border)
+window_border = {'left':750, 'top':144, 'width':85, 'height':20}
+######################################
 
-def find_click(template,tolerance=40000000,duration=0.8,delay=0.5,screen=monitor):
+def find_click(template,tolerance=35000000,duration=0.8,delay=0.5,screen=monitor):
     sleep(0.1)
     offset = np.array((template.shape[1]//2, template.shape[0]//2))
 
@@ -48,6 +61,9 @@ def find_click(template,tolerance=40000000,duration=0.8,delay=0.5,screen=monitor
     if max_val>tolerance:
         #y,x = np.unravel_index(match,result.shape)#+offset
         #print("Found at %f %f"%(x/1920*100,y/1080*100))
+        global prec_val,repetition
+        repetition = max_val==prec_val
+        prec_val = max_val
         mouse.move(x,y,duration=duration)
         mouse.click()
         sleep(delay)
@@ -61,28 +77,41 @@ def find_click(template,tolerance=40000000,duration=0.8,delay=0.5,screen=monitor
     # no correspondences
     return False
 
-# 1257, 745
-window = {'left':633, 'top':214, 'width':672, 'height':548}
-
-thumb = cv2.imread(f"{PATH}thumb_up3.png",cv2.IMREAD_UNCHANGED)
-hammer = cv2.imread(f"{PATH}hammer.png",cv2.IMREAD_UNCHANGED)
-work = cv2.imread(f"{PATH}work.png",cv2.IMREAD_UNCHANGED)
+thumb = np.load(path(IMG_PATH,'thumb_up.npy')) #cv2.imread(path(IMG_PATH,'thumb_up3.png'),cv2.IMREAD_UNCHANGED)
+hammer = cv2.imread(path(IMG_PATH,'hammer.png'),cv2.IMREAD_UNCHANGED)
+work = cv2.imread(path(IMG_PATH,'work.png'),cv2.IMREAD_UNCHANGED)
 #image = cv2.imread("screen7.png",0)
 #result = cv2.matchTemplate(image,template,cv2.TM_CCOEFF_NORMED)
 #print(result.argmax())
 
 def send_to_work():
+    found = False
     for i in range(6):
-        if not(find_click(work,tolerance=20000000,duration=0.2,screen=window)):
+        if not(find_click(work,tolerance=25000000,duration=0.2,screen=window)):
             break
-    mouse.move(window['left'],window['top'],duration=0.2)
-    mouse.click()
-    sleep(0.5)
+        found = True
+    
+    global window_border,repetition
+    if np.array_equal(sct.grab(window_border),np.load(path(IMG_PATH,'window_border.npy'))):
+        # close the in-game window clicking on the exit arrow on the top-left
+        mouse.move(window['left'],window['top'],duration=0.2)
+        mouse.click()
+        sleep(0.5)
+        repetition = not(found)
+    else:
+        repetition = False
 
 while not(mouse.is_pressed(mouse.RIGHT)):
     sleep(1)
     find_click(thumb,delay=2)
-    if find_click(hammer,20000000,delay=0.5):
-        print("Found!")
-        send_to_work()
+    if repetition:
+        if find_click(hammer,23000000,delay=0.5,screen=left_side):
+            send_to_work()
+        if repetition:
+            if find_click(hammer,23000000,delay=0.5,screen=right_side):
+                send_to_work()
+    else:
+        if find_click(hammer,23000000,delay=0.5):
+            #print("Found!")
+            send_to_work()
     #print("--new loop--")
