@@ -77,9 +77,9 @@ def find_click(template,tolerance=35000000,duration=0.8,delay=0.5,screen=monitor
     # no correspondences
     return False
 
-thumb = np.load(path(IMG_PATH,'thumb_up.npy')) #cv2.imread(path(IMG_PATH,'thumb_up3.png'),cv2.IMREAD_UNCHANGED)
-hammer = cv2.imread(path(IMG_PATH,'hammer.png'),cv2.IMREAD_UNCHANGED)
-work = cv2.imread(path(IMG_PATH,'work.png'),cv2.IMREAD_UNCHANGED)
+thumb = np.load(path(IMG_PATH,'thumb_up.npy'))
+hammer = np.load(path(IMG_PATH,'hammer.npy'))
+work = np.load(path(IMG_PATH,'work.npy'))
 #image = cv2.imread("screen7.png",0)
 #result = cv2.matchTemplate(image,template,cv2.TM_CCOEFF_NORMED)
 #print(result.argmax())
