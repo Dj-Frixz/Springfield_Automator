@@ -22,7 +22,7 @@ right_side = {'left':1039, 'top':0, 'width':881, 'height':1080}
 # in-game window
 window = {'left':633, 'top':214, 'width':672, 'height':548}
 # in-game window border (not really, more of a recognisable part of the border)
-window_border = {'left':750, 'top':144, 'width':85, 'height':20}
+window_border = {'left':747, 'top':144, 'width':85, 'height':20}
 ######################################
 
 def find_click(template,tolerance=35000000,duration=0.8,delay=0.5,screen=monitor):
@@ -93,15 +93,17 @@ def send_to_work():
     
     global window_border,repetition
     if np.array_equal(sct.grab(window_border),np.load(path(IMG_PATH,'window_border.npy'))):
+        print(True)
         # close the in-game window clicking on the exit arrow on the top-left
         mouse.move(window['left'],window['top'],duration=0.2)
         mouse.click()
         sleep(0.5)
         repetition = not(found)
     else:
+        print(False)
         repetition = False
 
-while not(mouse.is_pressed(mouse.RIGHT)):
+while not(mouse.is_pressed(mouse.MIDDLE)):
     sleep(1)
     find_click(thumb,delay=2)
     if repetition:
@@ -112,6 +114,4 @@ while not(mouse.is_pressed(mouse.RIGHT)):
                 send_to_work()
     else:
         if find_click(hammer,23000000,delay=0.5):
-            #print("Found!")
             send_to_work()
-    #print("--new loop--")
