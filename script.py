@@ -115,3 +115,4 @@ while not(mouse.is_pressed(mouse.MIDDLE)):
     else:
         if find_click(hammer,23000000,delay=0.5):
             send_to_work()
+sct.close()
